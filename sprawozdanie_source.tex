@@ -1,0 +1,162 @@
+\documentclass{article}
+\usepackage[T1]{fontenc}
+\usepackage[polish]{babel}
+\usepackage{graphicx}
+\usepackage{amsmath}
+\usepackage{hyperref}
+\usepackage{geometry}
+\usepackage{float}
+\geometry{a4paper, margin=2.5cm}
+
+\title{Układy równań liniowych}
+\author{Karolina Glaza \\ \href{https://github.com/kequel}{github.com/kequel}}
+\date{Maj 2025}
+
+\begin{document}
+
+\maketitle
+
+\section{Generacja macierzy i wektora}
+Wygenerowano macierz 
+$\mathbf{A}$ o postaci:
+\[
+\mathbf{Ax} = \mathbf{b},
+\]
+gdzie:
+\begin{itemize}
+    \item $\mathbf{A}$ jest macierzą pasmową o rozmiarze $N \times N$ ($N = 1293$), zdefiniowaną przez:
+    \begin{itemize}
+        \item Główną diagonalę: $a_1 = 6$,
+        \item Sąsiednie diagonale: $a_2 = -1$,
+        \item Skrajne diagonale: $a_3 = -1$.
+    \end{itemize}
+    \item $\mathbf{b}$ jest wektorem pobudzenia, gdzie $n$-ty element wynosi $\sin(n \cdot 9)$ . \\
+\end{itemize}
+
+\subsection*{Opis metod numerycznych}
+Dla rozwiązania układu $\mathbf{Ax} = \mathbf{b}$ zastosowano trzy podejścia: metodę Jacobiego, Gaussa-Seidla oraz faktoryzację LU.
+
+\subsubsection*{Metoda Jacobiego}
+W każdej iteracji $k$, nowe przybliżenie $x^{(k+1)}$ obliczane jest niezależnie, według wzoru:
+\begin{equation}
+x_i^{(k+1)} = \frac{1}{a_{ii}} \left( b_i - \sum_{\substack{j=1 \\ j \ne i}}^n a_{ij} x_j^{(k)} \right), \quad i = 1, 2, ..., n.
+\end{equation}
+\\
+
+\subsubsection*{Metoda Gaussa-Seidla} 
+W tej metodzie, podczas iteracji $k$, bieżące przybliżenia są wykorzystywane natychmiast:
+\begin{equation}
+x_i^{(k+1)} = \frac{1}{a_{ii}} \left( b_i - \sum_{j=1}^{i-1} a_{ij} x_j^{(k+1)} - \sum_{j=i+1}^{n} a_{ij} x_j^{(k)} \right), \quad i = 1, 2, ..., n.
+\end{equation}
+\\
+
+\subsubsection*{Faktoryzacja LU}
+Macierz $\mathbf{A}$ rozkładana jest jako:
+\[
+\mathbf{A} = \mathbf{L} \mathbf{U},
+\]
+gdzie:
+\begin{itemize}
+    \item $\mathbf{L}$ — macierz dolnotrójkątna z jedynkami na diagonali,
+    \item $\mathbf{U}$ — macierz górnotrójkątna.
+\end{itemize}
+
+Elementy macierzy $L$ i $U$ wyznaczane są rekurencyjnie:
+\begin{equation}
+l_{ik} = \frac{a_{ik}^{(k)}}{u_{kk}}, \quad \text{dla } i > k,
+\end{equation}
+\begin{equation}
+u_{ij}^{(k+1)} = u_{ij}^{(k)} - l_{ik} \cdot u_{kj}^{(k)}, \quad \text{dla } j = k, k+1,  .., n.
+\end{equation}
+\\
+
+\section{Metody iteracyjne dla $a_1 = 6$}
+\subsection{Wykres}
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.8\textwidth]{zmiana_normy_6.png}
+    \caption{Zmiana normy residuum w kolejnych iteracjach (skala logarytmiczna).}
+    \label{fig:zmiana_6}
+\end{figure}
+
+\subsection{Wyniki}
+\begin{itemize}
+    \item Metoda Jacobiego: zbieżność osiągnięta po $\sim 37$ iteracjach.
+    \item Metoda Gaussa-Seidla: zbieżność osiągnięta po $\sim 23$ iteracjach.
+\\\\ Gauss-Seidel był prawie $2\times$ szybszy od Jacobiego.
+\end{itemize}
+
+\section{Metody iteracyjne dla $a_1 = 3$}
+\subsection{Wykres}
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.8\textwidth]{zmiana_normy_3.png}
+    \caption{Zmiana normy residuum dla $a_1 = 3$ (skala logarytmiczna).}
+    \label{fig:zmiana_3}
+\end{figure}
+\subsection{Wyniki}
+\begin{itemize}
+    \item Obie metody są \textbf{rozbieżne} – norma residuum rośnie wykładniczo.
+    \item Metody iteracyjne, takie jak Jacobi i Gauss-Seidel, gwarantują zbieżność tylko dla macierzy diagonalnie dominujących.  
+ \[
+|a_{ii}| = 3 
+\]
+\[
+\sum_{j \neq i} |a_{ij}| = |-1| + |-1| + |-1| + |-1| = 4
+\]
+ \[
+|a_{ii}| < |a_{ij}|
+\]
+    Macierz $\mathbf{A}$ nie jest diagonalnie dominująca dla $a_1 = 3$ .
+    \\
+\end{itemize}
+
+\section{ Metoda LU dla $a_1 = 3$}
+\subsection{Wyniki}
+\begin{itemize}
+    \item Norma residuum: $\|\mathbf{r}\|_2 \approx 2.42 \times 10^{-13}$.
+    \\\\ Metoda LU zapewnia bardzo dokładne rozwiązanie – błąd mieści się w granicach precyzji numerycznej dla macierzy dobrze uwarunkowanej.
+\end{itemize}
+
+\section{Analiza czasu wykonania}
+\subsection{Wykresy}
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.8\textwidth]{czas_lin.png}
+    \caption{Czas rozwiązania w zależności od $N$ (skala liniowa).}
+    \label{fig:czas_lin}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.8\textwidth]{czas_log.png}
+    \caption{Czas rozwiązania w zależności od $N$ (skala logarytmiczna).}
+    \label{fig:czas_log}
+\end{figure}
+
+\subsection{Obserwacje}
+\begin{itemize}
+    \item Metody iteracyjne (Jacobi, Gauss-Seidel): linie są lekko rosnące, niemal płaskie – czas wzrasta powoli, wzrost jest zgodny z liniową złożonością czasową.
+    \item Metoda LU: Czas działania metody LU rośnie gwałtownie od $N \approx 500$, a szczególnie mocno dla $N > 2000$ – czas rośnie dużo szybciej, co wskazuje na wyższą złożoność obliczeniową (rzędu $O(N^3)$). Dla większych $N$ metoda LU staje się niepraktyczna.
+    \\
+\end{itemize}
+    
+\section{Podsumowanie}
+\begin{itemize}
+    \item Metody iteracyjne są efektywne dla macierzy diagonalnie dominujących (np. $a_1 = 6$).
+    \item Gauss-Seidel jest prawie $2\times$ szybszy od Jacobiego dzięki aktualizacji wartości w locie.
+    \item Metoda LU jest dokładna, ale ma wysoką złożoność obliczeniową.
+    \item Dla $a_1 = 3$ (kiedy macierz nie jest diagonalnie dominująca) metody iteracyjne zawodzą – konieczne jest użycie metod bezpośrednich.
+    \\
+\end{itemize}
+
+\section{Bibliografia}
+\begin{itemize}
+    \item \href{https://en.wikipedia.org/wiki/Jacobi_method}{Wózr Metoda Jacobiego}
+    \item \href{https://en.wikipedia.org/wiki/Gauss%E2%80%93Seidel_method}{Wzór Metoda Gaussa-Seidla}
+    \item \href{https://en.wikipedia.org/wiki/LU_decomposition}{Wzór Metoda LU}
+    \item \href{https://mst.mimuw.edu.pl/lecture.php?lecture=mo2&part=Ch5}{Zbieżność metody Gauss–Seidel}
+
+\end{itemize}
+
+\end{document}
